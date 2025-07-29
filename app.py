@@ -42,12 +42,13 @@ if uploaded_file is not None:
     heure_min = df["Timestamp"].min().to_pydatetime()
     heure_max = df["Timestamp"].max().to_pydatetime()
 
-    # Sélection de la plage horaire
+    # Sélection de la plage horaire avec affichage des heures
     debut, fin = st.slider(
         "Sélectionnez une plage horaire à afficher",
         min_value=heure_min,
         max_value=heure_max,
-        value=(heure_min, heure_max)
+        value=(heure_min, heure_max),
+        format="HH:mm"
     )
 
     # Filtrage global du DataFrame en fonction de la plage choisie
