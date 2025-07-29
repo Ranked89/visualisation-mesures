@@ -4,15 +4,17 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime
 
-st.title("Visualisation interactive de données (version Plotly)")
+st.set_page_config(layout="wide")
+st.title("Visualisation interactive de données - Datalogger")
 
-uploaded_file = st.file_uploader("Choisissez un fichier CSV", type=["csv"])
-lissage = st.slider("Niveau de lissage (0 = brut, max = 10)", 0, 10, 3)
+uploaded_file = st.file_uploader("📄 Choisissez un fichier CSV", type=["csv"])
+lissage = st.slider("🎚️ Niveau de lissage (0 = brut, max = 10)", 0, 10, 3)
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file, sep=';', encoding='utf-8')
     df.columns = df.columns.str.strip()
 
+    # Création du timestamp
     df["Timestamp"] = pd.to_datetime(df["Date"] + " " + df["Heure"], errors="coerce", dayfirst=True)
     df.drop(columns=["Date", "Heure"], inplace=True)
     df = df.dropna(subset=["Timestamp"])
@@ -26,7 +28,7 @@ if uploaded_file is not None:
     heure_max = df["Timestamp"].max().to_pydatetime()
 
     debut, fin = st.slider(
-        "Sélectionnez une plage horaire à afficher",
+        "⏱️ Sélectionnez une plage horaire à afficher",
         min_value=heure_min,
         max_value=heure_max,
         value=(heure_min, heure_max),
@@ -39,9 +41,9 @@ if uploaded_file is not None:
     colonnes_tension = [col for col in df.columns if "Tension" in col]
     colonnes_courant = [col for col in df.columns if "Courant" in col]
 
-    colonnes_a_afficher = colonnes_temp + colonnes_tension + colonnes_courant
+    colonnes_disponibles = colonnes_temp + colonnes_tension + colonnes_courant
 
-    mesure_choisie = st.selectbox("Choisissez une mesure à afficher", colonnes_a_afficher)
+    mesure_choisie = st.selectbox("📊 Choisissez une mesure à afficher", colonnes_disponibles)
 
     data = df[["Timestamp", mesure_choisie]].copy()
 
@@ -53,13 +55,13 @@ if uploaded_file is not None:
             data[mesure_choisie] = data[mesure_choisie].rolling(window=lissage, center=True).mean()
 
     if data[mesure_choisie].dropna().empty:
-        st.warning("Pas de données valides à afficher pour cette mesure.")
+        st.warning("⚠️ Aucune donnée valide à afficher pour cette mesure.")
     else:
         fig = px.line(
             data.dropna(),
             x="Timestamp",
             y=mesure_choisie,
-            title=f"Courbe interactive : {mesure_choisie}",
+            title=f"📈 Courbe interactive : {mesure_choisie}",
             labels={"Timestamp": "Heure", mesure_choisie: mesure_choisie}
         )
         fig.update_layout(xaxis_title="Heure", yaxis_title=mesure_choisie, hovermode="x unified")
