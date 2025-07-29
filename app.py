@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from io import BytesIO
 import matplotlib.dates as mdates
+from datetime import datetime
 
 # Titre de l'application
 st.title("Visualisation de données de datalogger")
@@ -32,20 +33,25 @@ if uploaded_file is not None:
     # Suppression des lignes totalement vides (hors timestamp)
     df = df.dropna(how='all', subset=df.columns.difference(['Timestamp']))
 
-    # Détermination de la plage horaire disponible
-    heure_min = df["Timestamp"].min()
-    heure_max = df["Timestamp"].max()
+    # Vérification des timestamps valides
+    if df["Timestamp"].empty:
+        st.error("Aucune donnée horodatée détectée dans le fichier.")
+        st.stop()
 
-    # Sélection interactive de la plage horaire
-    plage_horaire = st.slider(
+    # Conversion explicite des bornes horaires en datetime.datetime
+    heure_min = df["Timestamp"].min().to_pydatetime()
+    heure_max = df["Timestamp"].max().to_pydatetime()
+
+    # Sélection de la plage horaire
+    debut, fin = st.slider(
         "Sélectionnez une plage horaire à afficher",
         min_value=heure_min,
         max_value=heure_max,
-        value=(heure_min, heure_max),
-        )
+        value=(heure_min, heure_max)
+    )
 
     # Filtrage global du DataFrame en fonction de la plage choisie
-    df = df[(df["Timestamp"] >= plage_horaire[0]) & (df["Timestamp"] <= plage_horaire[1])]
+    df = df[(df["Timestamp"] >= debut) & (df["Timestamp"] <= fin)]
 
     # Détection automatique des types de mesures à tracer
     colonnes_temp = [col for col in df.columns if "Temp" in col]
