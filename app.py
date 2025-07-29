@@ -1,3 +1,4 @@
+
 # Importation des bibliothèques nécessaires
 import streamlit as st
 import pandas as pd
@@ -30,6 +31,22 @@ if uploaded_file is not None:
 
     # Suppression des lignes totalement vides (hors timestamp)
     df = df.dropna(how='all', subset=df.columns.difference(['Timestamp']))
+
+    # Détermination de la plage horaire disponible
+    heure_min = df["Timestamp"].min()
+    heure_max = df["Timestamp"].max()
+
+    # Sélection interactive de la plage horaire
+    plage_horaire = st.slider(
+        "Sélectionnez une plage horaire à afficher",
+        min_value=heure_min,
+        max_value=heure_max,
+        value=(heure_min, heure_max),
+        format="HH:mm"
+    )
+
+    # Filtrage global du DataFrame en fonction de la plage choisie
+    df = df[(df["Timestamp"] >= plage_horaire[0]) & (df["Timestamp"] <= plage_horaire[1])]
 
     # Détection automatique des types de mesures à tracer
     colonnes_temp = [col for col in df.columns if "Temp" in col]
