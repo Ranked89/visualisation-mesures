@@ -42,8 +42,7 @@ if uploaded_file is not None:
         min_value=heure_min,
         max_value=heure_max,
         value=(heure_min, heure_max),
-        format="HH:mm"
-    )
+        )
 
     # Filtrage global du DataFrame en fonction de la plage choisie
     df = df[(df["Timestamp"] >= plage_horaire[0]) & (df["Timestamp"] <= plage_horaire[1])]
